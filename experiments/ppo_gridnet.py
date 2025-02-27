@@ -5,6 +5,7 @@ import os
 import random
 import subprocess
 import time
+from math import log
 from distutils.util import strtobool
 from typing import List
 
@@ -410,7 +411,7 @@ if __name__ == "__main__":
     for update in range(starting_update, args.num_updates + 1):
         # Annealing the rate if instructed to do so.
         if args.anneal_lr:
-            frac = 1.0 - (update - 1.0) / args.num_updates
+            frac = min(1.0, -log((update - 1.0) / args.num_updates, base=10))
             lrnow = lr(frac)
             optimizer.param_groups[0]["lr"] = lrnow
 
