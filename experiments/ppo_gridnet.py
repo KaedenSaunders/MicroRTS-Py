@@ -22,6 +22,7 @@ from torch.utils.tensorboard import SummaryWriter
 from gym_microrts import microrts_ai
 from gym_microrts.envs.vec_env import MicroRTSGridModeVecEnv
 
+from math import log
 
 def parse_args():
     # fmt: off
@@ -96,6 +97,8 @@ def parse_args():
     parser.add_argument('--train-maps', nargs='+', default=["maps/16x16/basesWorkers16x16A.xml"],
         help='the list of maps used during training')
     parser.add_argument('--eval-maps', nargs='+', default=["maps/16x16/basesWorkers16x16A.xml"],
+        help='the list of maps used during evaluation')
+    parser.add_argument('--lr-coeff', type=float, default=1,
         help='the list of maps used during evaluation')
 
     args = parser.parse_args()
@@ -413,8 +416,9 @@ if __name__ == "__main__":
     for update in range(starting_update, args.num_updates + 1):
         # Annealing the rate if instructed to do so.
         if args.anneal_lr:
-            frac = 1.0 - (update - 1.0) / args.num_updates
+            frac = min(1, log((update + 1.0) / args.num_updates))
             lrnow = lr(frac)
+            print(lrnow)
             optimizer.param_groups[0]["lr"] = lrnow
 
         # TRY NOT TO MODIFY: prepare the execution of the game.
